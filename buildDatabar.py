@@ -52,7 +52,9 @@ def read_article(html_file: Path) -> dict:
         "date": metadata.get("date", ""),
         "tag": slug_to_title(html_file.parent.name),
         "url": metadata.get("url", ""),
-        "summary": metadata.get("summary", "")
+        "summary": metadata.get("summary", ""),
+        "author": metadata.get("author", "Anonymous"),                      # 🟢 新增：作者名字
+        "authorAvatar": metadata.get("author-avatar", "images/avatar.png")  # 🟢 新增：作者头像链接
     }
 
 

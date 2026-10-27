@@ -1,20 +1,29 @@
 // ==========================================
-// 文章列表与交互组件 / Article list & interaction component
+// 文章列表与多维筛选组件 / Article list & dual-filtering component
 // ==========================================
 
 window.Blog = window.Blog || {};
 
-// 重构后的文章列表渲染与分页控制器
+// 定义全局视图状态（支持分类与作者双重筛选）
+window.Blog.homeState = window.Blog.homeState || {
+    currentCategory: 'All',
+    currentAuthor: null,  // 🟢 改为记录当前选中的作者
+    currentPage: 1,
+    pageSize: 15
+};
+
 Blog.initArticleList = function(database) {
     let allArticles = [];
 
-    // 合并所有分类中的文章，并附加分类信息
+    // 合并所有分类中的文章，并安全提取作者信息
     database.categories.forEach(cat => {
         cat.articles.forEach(art => {
             allArticles.push({ 
                 ...art, 
                 categoryName: cat.name, 
-                categoryIcon: cat.icon || '' 
+                categoryIcon: cat.icon || '',
+                author: art.author || 'Anonymous',
+                authorAvatar: art.authorAvatar || 'images/avatar.png'
             });
         });
     });
@@ -22,12 +31,13 @@ Blog.initArticleList = function(database) {
     // 默认按日期倒序排列 (Newest First)
     allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // 收集全站所有唯一的标签 (Tags)
-    const tagSet = new Set();
+    // 收集全站所有唯一的作者信息（名字 + 头像）
+    const authorMap = new Map();
     allArticles.forEach(art => {
-        if (art.tag) tagSet.add(art.tag);
+        if (art.author) {
+            authorMap.set(art.author, art.authorAvatar);
+        }
     });
-    const allTags = Array.from(tagSet);
 
     // 获取页面中的 DOM 挂载点
     const pillsContainer = document.getElementById("category-pills-container");
@@ -38,6 +48,12 @@ Blog.initArticleList = function(database) {
     const clearTagBtn = document.getElementById("clear-tag-filter");
     const gridContainer = document.getElementById("article-grid-container");
     const paginationContainer = document.getElementById("pagination-container");
+
+    // 修改 Browse topics 按钮的文案提示（如果需要的话，也可以保留原样）
+    if (browseBtn) {
+        const spanEl = browseBtn.querySelector('span');
+        if (spanEl) spanEl.textContent = 'Browse authors';
+    }
 
     // 渲染顶部胶囊分类栏
     const categories = ["All", ...database.categories.map(c => c.name)];
@@ -57,23 +73,33 @@ Blog.initArticleList = function(database) {
         }).join('');
     }
 
-    // 渲染标签弹窗内容
-    function renderTags() {
+    // 渲染右上角弹窗中的作者列表
+    function renderAuthorsPopover() {
         if (!tagsContainer) return;
-        tagsContainer.innerHTML = allTags.map(tag => {
-            const isActive = Blog.homeState.currentTag === tag;
+        
+        let html = '';
+        authorMap.forEach((avatar, authorName) => {
+            const isActive = Blog.homeState.currentAuthor === authorName;
             const activeClass = isActive
-                ? "bg-[#588157] text-white font-semibold"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200";
-            return `
-                <button class="tag-pill px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${activeClass}" data-tag="${tag}">
-                    ${Blog.escapeHtml(tag)}
+                ? "bg-green-50 border-green-500 text-green-900 shadow-xs"
+                : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100";
+            
+            html += `
+                <button class="author-pill w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all cursor-pointer text-left ${activeClass}" data-author="${authorName}">
+                    <img src="${Blog.escapeHtml(avatar)}" alt="${Blog.escapeHtml(authorName)}" class="w-8 h-8 rounded-full object-cover border border-gray-200">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-semibold truncate">${Blog.escapeHtml(authorName)}</div>
+                        <div class="text-xs text-gray-400">Author</div>
+                    </div>
                 </button>
             `;
-        }).join('');
+        });
+        
+        tagsContainer.innerHTML = html || '<div class="text-xs text-gray-400 p-2">No authors found</div>';
 
         if (clearTagBtn) {
-            if (Blog.homeState.currentTag) {
+            clearTagBtn.textContent = "Clear author";
+            if (Blog.homeState.currentAuthor) {
                 clearTagBtn.classList.remove('hidden');
             } else {
                 clearTagBtn.classList.add('hidden');
@@ -81,19 +107,19 @@ Blog.initArticleList = function(database) {
         }
     }
 
-    // 核心渲染函数：根据状态过滤、排序、分页并输出视图
+    // 核心渲染函数：双重筛选、排序、分页与视图更新
     function updateView() {
-        // 1. 组合过滤（分类 + 标签）
+        // 1. 双重过滤（分类 + 作者）
         let filtered = allArticles.filter(art => {
             const matchCategory = Blog.homeState.currentCategory === 'All' || art.categoryName === Blog.homeState.currentCategory;
-            const matchTag = !Blog.homeState.currentTag || art.tag === Blog.homeState.currentTag;
-            return matchCategory && matchTag;
+            const matchAuthor = !Blog.homeState.currentAuthor || art.author === Blog.homeState.currentAuthor;
+            return matchCategory && matchAuthor;
         });
 
         // 2. 更新左侧主标题
         if (titleEl) {
-            if (Blog.homeState.currentTag) {
-                titleEl.textContent = `${Blog.homeState.currentCategory} / #${Blog.homeState.currentTag}`;
+            if (Blog.homeState.currentAuthor) {
+                titleEl.textContent = `${Blog.homeState.currentCategory} / By ${Blog.homeState.currentAuthor}`;
             } else {
                 titleEl.textContent = Blog.homeState.currentCategory === 'All' ? 'All Articles' : Blog.homeState.currentCategory;
             }
@@ -108,7 +134,7 @@ Blog.initArticleList = function(database) {
         const startIndex = (Blog.homeState.currentPage - 1) * pageSize;
         const pageArticles = filtered.slice(startIndex, startIndex + pageSize);
 
-        // 4. 渲染 3 列文章网格
+        // 4. 渲染 3 列文章网格（左下角展示作者头像与名字）
         if (gridContainer) {
             if (pageArticles.length === 0) {
                 gridContainer.innerHTML = `
@@ -133,9 +159,14 @@ Blog.initArticleList = function(database) {
                             </h3>
                             <p class="text-gray-600 text-sm leading-relaxed line-clamp-3">${Blog.escapeHtml(art.summary)}</p>
                         </div>
-                        <div class="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
-                            <span class="flex items-center gap-1">📁 ${Blog.escapeHtml(art.categoryName)}</span>
-                            <a href="${art.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-green-700 font-medium hover:underline">Read article →</a>
+                        
+                        <!-- 卡片底部：左侧作者头像+名字，右侧分类/阅读链接 -->
+                        <div class="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <img src="${Blog.escapeHtml(art.authorAvatar)}" alt="${Blog.escapeHtml(art.author)}" class="w-6 h-6 rounded-full object-cover border border-gray-200">
+                                <span class="font-medium text-gray-700">${Blog.escapeHtml(art.author)}</span>
+                            </div>
+                            <a href="${art.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-green-700 font-medium hover:underline">Read →</a>
                         </div>
                     </div>
                 `).join('');
@@ -185,13 +216,13 @@ Blog.initArticleList = function(database) {
             const btn = e.target.closest('.category-pill');
             if (!btn) return;
             Blog.homeState.currentCategory = btn.getAttribute('data-category');
-            Blog.homeState.currentPage = 1; // 切换分类重置到第一页
+            Blog.homeState.currentPage = 1;
             renderPills();
             updateView();
         });
     }
 
-    // 2. 切换 Browse topics 标签弹窗显示与隐藏
+    // 2. 切换 Browse authors 弹窗显示与隐藏
     if (browseBtn && popover) {
         browseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -204,19 +235,20 @@ Blog.initArticleList = function(database) {
         });
     }
 
-    // 3. 点击标签进行过滤
+    // 3. 点击作者进行双重过滤
     if (tagsContainer) {
         tagsContainer.addEventListener('click', (e) => {
-            const btn = e.target.closest('.tag-pill');
+            const btn = e.target.closest('.author-pill');
             if (!btn) return;
-            const clickedTag = btn.getAttribute('data-tag');
-            if (Blog.homeState.currentTag === clickedTag) {
-                Blog.homeState.currentTag = null; // 再次点击取消过滤
+            const clickedAuthor = btn.getAttribute('data-author');
+            
+            if (Blog.homeState.currentAuthor === clickedAuthor) {
+                Blog.homeState.currentAuthor = null; // 再次点击取消作者筛选
             } else {
-                Blog.homeState.currentTag = clickedTag;
+                Blog.homeState.currentAuthor = clickedAuthor;
             }
             Blog.homeState.currentPage = 1;
-            renderTags();
+            renderAuthorsPopover();
             updateView();
             popover.classList.add('hidden');
         });
@@ -224,9 +256,9 @@ Blog.initArticleList = function(database) {
 
     if (clearTagBtn) {
         clearTagBtn.addEventListener('click', () => {
-            Blog.homeState.currentTag = null;
+            Blog.homeState.currentAuthor = null;
             Blog.homeState.currentPage = 1;
-            renderTags();
+            renderAuthorsPopover();
             updateView();
         });
     }
@@ -239,13 +271,12 @@ Blog.initArticleList = function(database) {
             const targetPage = parseInt(btn.getAttribute('data-page'));
             Blog.homeState.currentPage = targetPage;
             updateView();
-            // 滚动回网格区域顶部，带来流畅体验
             gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     }
 
     // 初始化首次渲染
     renderPills();
-    renderTags();
+    renderAuthorsPopover();
     updateView();
 };

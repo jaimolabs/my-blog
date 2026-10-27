@@ -17,7 +17,9 @@ window.DATABAR_CONFIG = {
                         "date": "2026-10-03",
                         "tag": "Products",
                         "url": "article.html?article=blog-website",
-                        "summary": "An open-source template for Web3 static blogs and personal knowledge bases, showcasing decentralized web practices."
+                        "summary": "An open-source template for Web3 static blogs and personal knowledge bases, showcasing decentralized web practices.",
+                        "author": "Anonymous",
+                        "authorAvatar": "images/avatar.png"
                     }
                 ]
             },
@@ -30,7 +32,9 @@ window.DATABAR_CONFIG = {
                         "date": "2026-10-23",
                         "tag": "Python",
                         "url": "article.html?article=python-basics",
-                        "summary": "These open-source study notes are based on the MIT 6.0001 course taught by Dr. Ana Bell and other professors. They are shared under the CC-BY-NC-SA license."
+                        "summary": "These open-source study notes are based on the MIT 6.0001 course taught by Dr. Ana Bell and other professors. They are shared under the CC-BY-NC-SA license.",
+                        "author": "Anonymous",
+                        "authorAvatar": "images/avatar.png"
                     }
                 ]
             },
@@ -43,7 +47,9 @@ window.DATABAR_CONFIG = {
                         "date": "2026-10-10",
                         "tag": "Topics",
                         "url": "article.html?article=token-price-simulation",
-                        "summary": "From fundamental assumptions to the derivation of Stochastic Differential Equations (SDEs). The complete process of mathematical modeling and quantitative simulation for token price generation functions."
+                        "summary": "From fundamental assumptions to the derivation of Stochastic Differential Equations (SDEs). The complete process of mathematical modeling and quantitative simulation for token price generation functions.",
+                        "author": "jaimo.eth",
+                        "authorAvatar": "/images/javatar.png"
                     }
                 ]
             }
