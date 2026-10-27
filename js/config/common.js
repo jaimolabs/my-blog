@@ -94,7 +94,8 @@ window.SITE_CONFIG = {
             support: {
                 title: "Get Support",
                 desc: "Explore documentation, GitHub repositories, and technical FAQs for self-hosted tools.",
-                btnText: "💬 Help Center"
+                btnText: "💬 Help Center",
+                url: "https://github.com/orgs/jaimolabs/discussions/1"
             },
             twitter: {
                 title: "Follow on X",

@@ -12,9 +12,12 @@ Blog.renderContactSection = function(commonConfig) {
     const contact = commonConfig.contact;
     const socialLinks = commonConfig.socialLinks;
 
-    // 根据名称匹配社交链接 / Find a social link by its name
-    const getUrl = (name) => {
-        const item = socialLinks.find(s => s.name.toLowerCase().includes(name.toLowerCase()));
+    // 🟢 升级版链接解析函数：优先读取卡片自带的 url，没有则按名称匹配 socialLinks
+    const getCardUrl = (cardConfig, fallbackName) => {
+        if (cardConfig && cardConfig.url) {
+            return cardConfig.url;
+        }
+        const item = socialLinks.find(s => s.name.toLowerCase().includes(fallbackName.toLowerCase()));
         return item ? item.url : '#';
     };
 
@@ -30,7 +33,7 @@ Blog.renderContactSection = function(commonConfig) {
                     <p class="text-sm text-gray-600 mt-2">${Blog.escapeHtml(contact.cards.support.desc)}</p>
                 </div>
                 <div class="mt-8">
-                    <a href="${getUrl('GitHub')}" target="_blank" class="inline-block bg-[#f4f7f4] border border-[#d8e2dc] text-[#2b2d42] text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#d8e2dc] transition">
+                    <a href="${getCardUrl(contact.cards.support, 'GitHub')}" target="_blank" class="inline-block bg-[#f4f7f4] border border-[#d8e2dc] text-[#2b2d42] text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#d8e2dc] transition">
                         ${Blog.escapeHtml(contact.cards.support.btnText)}
                     </a>
                 </div>
@@ -42,7 +45,7 @@ Blog.renderContactSection = function(commonConfig) {
                     <p class="text-sm text-gray-600 mt-2">${Blog.escapeHtml(contact.cards.twitter.desc)}</p>
                 </div>
                 <div class="mt-8">
-                    <a href="${getUrl('X')}" target="_blank" class="inline-block bg-[#f4f7f4] border border-[#d8e2dc] text-[#2b2d42] text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#d8e2dc] transition">
+                    <a href="${getCardUrl(contact.cards.twitter, 'X')}" target="_blank" class="inline-block bg-[#f4f7f4] border border-[#d8e2dc] text-[#2b2d42] text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#d8e2dc] transition">
                         ${Blog.escapeHtml(contact.cards.twitter.btnText)}
                     </a>
                 </div>
