@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <link id="favicon" rel="icon" type="image/png" href="">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        :root {
+            --sage-primary: #588157;
+            --sage-light: #f4f7f4;
+            --sage-border: #d8e2dc;
+            --sage-hover: #3a5a40;
+        }
+        body {
+            background-color: var(--sage-light);
+            color: #2b2d42;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-[#588157] selection:text-white pt-24">
+
+    <!-- 1. 顶部导航栏 / Top navigation bar -->
+    <header id="navbar-container"></header>
+
+    <!-- 2. 全局提示 / Global toast notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2"></div>
+
+    <!-- 3. 头图区域 / Hero section -->
+    <section id="hero-container" class="w-full"></section>
+
+    <!-- 4. 主体文章区域 / Main article section -->
+    <main id="main-container" class="flex-1"></main>
+
+    <!-- 5. 联系我们区域 / Contact section -->
+    <section id="contact-container" class="flex-grow max-w-7xl mx-auto px-6 py-12 w-full space-y-20"></section>
+
+    <!-- 6. 页脚 / Footer -->
+    <footer id="footer-container"></footer>
+
+    <!-- 加载配置 / Load configuration -->
+    <script src="js/config/common.js"></script>
+    <script src="js/config/pages/databar.js"></script>
+    <script src="js/config/pages/home.js"></script>
+
+    <!-- 加载后端数据交互服务 / Load backend data interaction services -->
+    <script src="js/database/appscript.js"></script>
+
+    <!-- 加载公共核心模块与工具 / Load shared core modules and utilities -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/wallet.js"></script>
+    <script src="js/core/support.js"></script>
+    <script src="js/core/navbar.js"></script>
+    <script src="js/core/hero.js"></script>
+    <script src="js/core/contact.js"></script>
+    <script src="js/core/footer.js"></script>
+
+    <!-- 加载页面组件 / Load page components -->
+    <script src="js/components/sidebar.js"></script>
+    <script src="js/components/articleList.js"></script>
+
+    <!-- 加载首页入口逻辑 / Load home page entry logic -->
+    <script src="js/pages/home.js"></script>
+</body>
+</html>
