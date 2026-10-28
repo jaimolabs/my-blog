@@ -9,6 +9,21 @@ window.DATABAR_CONFIG = {
         "title": "Database",
         "categories": [
             {
+                "name": "Journal",
+                "articles": [
+                    {
+                        "id": "just-a-bit-slower",
+                        "title": "Just A Bit Slower",
+                        "date": "2026-11-01",
+                        "tag": "Journal",
+                        "url": "article.html?article=just-a-bit-slower",
+                        "summary": "Choosing to slow down in an era obsessed with speed. A self-reflection, foundational thinking, and long-term blueprint from an independent builder.",
+                        "author": "jaimo.eth",
+                        "authorAvatar": "/images/javatar.png"
+                    }
+                ]
+            },
+            {
                 "name": "Products",
                 "articles": [
                     {
